@@ -48,10 +48,12 @@ namespace MechJebRCSFXExt
                     Vector3 torque = Vector3.Cross(inputAngular.normalized, relPos.normalized);
 
                     Vector3 thruster = rcs.useZaxis ? xform.forward : xform.up;
+                    float leverDistance = rcs.GetLeverDistance(-thruster, vessel.CoM);
+
 
                     float thrust = Mathf.Max(Vector3.Dot(thruster, torque), 0f);
                     thrust += Mathf.Max(Vector3.Dot(thruster, inputLinear.normalized), 0f);
-                    
+
                     //if (thrust <= 0f)
                     //{
                     //    print("Ignore " + thrust.ToString("F2") + " " + Vector3.Dot(thruster, torque).ToString("F2") + " " + Vector3.Dot(thruster, inputLinear.normalized).ToString("F2"));
@@ -62,7 +64,6 @@ namespace MechJebRCSFXExt
                     {
                         if (rcs.useLever)
                         {
-                            float leverDistance = rcs.GetLeverDistance(-thruster, CoM);
 
                             if (leverDistance > 1)
                             {
@@ -74,16 +75,17 @@ namespace MechJebRCSFXExt
                             thrust *= rcs.precisionFactor;
                         }
                     }
-                    
+
                     float thrustForce = (float)thrustBase * thrust;
 
-                    Vector3 force = vessel.GetTransform().InverseTransformDirection(-thrustForce * thruster);
+                    Vector3 force = vessel.GetTransform().InverseTransformDirection(thrustForce * thruster);
 
                     force.Scale(new Vector3(rcs.enableX ? 1f : 0f, rcs.enableZ ? 1f : 0f, rcs.enableY ? 1f : 0f));
-                    
+
                     vesselState.rcsThrustAvailable.Add(force);
-                    
-                    Vector3 thrusterTorque = vessel.GetTransform().InverseTransformDirection(Vector3.Cross(relPos, force));
+
+                    //Vector3d thrusterTorque = Vector3.Cross(relPos, -thruster) * leverDistance * thrustBase;
+                    Vector3d thrusterTorque = thruster * (leverDistance * thrustForce);
                     // Convert in vessel local coordinate
 
                     thruster.Scale(new Vector3d(rcs.enablePitch ? 1f : 0f, rcs.enableRoll ? 1f : 0f, rcs.enableYaw ? 1f : 0));
