@@ -35,8 +35,9 @@ namespace MechJebRCSFXExt
             Vector3 inputLinear = vessel.ReferenceTransform.rotation * Vector3.one;
 
             int xformCount = rcs.thrusterTransforms.Count;
+            bool success; // Just to pass to rcs.CalculateThrust(). Probably not going to use it. Or might!
 
-            double thrustBase = rcs.flowMult * rcs.fuelFlow * rcs.realISP * rcs.G * rcs.ispMult;
+            float thrustBase = rcs.CalculateThrust(1f, out success);
 
             for (int i = 0; i < xformCount; ++i)
             {
@@ -76,7 +77,7 @@ namespace MechJebRCSFXExt
                         }
                     }
 
-                    float thrustForce = (float)thrustBase * thrust;
+                    float thrustForce = thrustBase * thrust;
 
                     Vector3 force = vessel.GetTransform().InverseTransformDirection(thrustForce * thruster);
 
