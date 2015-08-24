@@ -45,12 +45,16 @@ namespace MechJebRCSFXExt
                 {
                     Vector3 position = xform.position;
                     Vector3 relPos = position - CoM;
-                    Vector3 torque = Vector3.Cross(inputAngular.normalized, relPos.normalized);
 
                     Vector3 thruster = rcs.useZaxis ? xform.forward : xform.up;
+                    
+                    inputLinear = thruster;
+                    inputAngular = Vector3.Cross(thruster.normalized, relPos.normalized).normalized;
+                    Debug.Log(inputAngular);
+                    Vector3 torque = Vector3.Cross(inputAngular, relPos.normalized);
 
                     float thrust = Mathf.Max(Vector3.Dot(thruster, torque), 0f);
-                    thrust += Mathf.Max(Vector3.Dot(thruster, inputLinear.normalized), 0f);
+                    thrust += Mathf.Max(Vector3.Dot(thruster, inputLinear), 0f);
                     
                     //if (thrust <= 0f)
                     //{
@@ -77,16 +81,17 @@ namespace MechJebRCSFXExt
                     
                     float thrustForce = (float)thrustBase * thrust;
 
+                    thruster.Scale(new Vector3d(rcs.enablePitch ? 1f : 0f, rcs.enableRoll ? 1f : 0f, rcs.enableYaw ? 1f : 0));
+
                     Vector3 force = vessel.GetTransform().InverseTransformDirection(-thrustForce * thruster);
 
                     force.Scale(new Vector3(rcs.enableX ? 1f : 0f, rcs.enableZ ? 1f : 0f, rcs.enableY ? 1f : 0f));
                     
                     vesselState.rcsThrustAvailable.Add(force);
                     
-                    Vector3 thrusterTorque = vessel.GetTransform().InverseTransformDirection(Vector3.Cross(relPos, force));
+                    Vector3 thrusterTorque = Vector3.Cross(relPos, force);
                     // Convert in vessel local coordinate
 
-                    thruster.Scale(new Vector3d(rcs.enablePitch ? 1f : 0f, rcs.enableRoll ? 1f : 0f, rcs.enableYaw ? 1f : 0));
                     vesselState.rcsTorqueAvailable.Add(vessel.GetTransform().InverseTransformDirection(thrusterTorque));
                 }
             }
