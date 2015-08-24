@@ -50,7 +50,6 @@ namespace MechJebRCSFXExt
                     
                     inputLinear = thruster;
                     inputAngular = Vector3.Cross(thruster.normalized, relPos.normalized).normalized;
-                    Debug.Log(inputAngular);
                     Vector3 torque = Vector3.Cross(inputAngular, relPos.normalized);
 
                     float thrust = Mathf.Max(Vector3.Dot(thruster, torque), 0f);
